@@ -1,58 +1,53 @@
 
 enum EYES {
-    //% block="Left"
-    LEFT = 873,
-    //% block="Mad"
-    MAD = 347,
     //% block="Open"
-    OPEN = 891,
-    //% block="Pop"
-    POP = 561,
-    //% block="Right"
-    RIGHT = 882,
+    OPEN,
     //% block="Sad"
-    SAD = 874,
+    SAD,
     //% block="Shut"
-    SHUT = 864,
+    SHUT,
+    //% block="Mad"
+    MAD,
     //% block="Up"
-    UP = 27,
+    UP,
+    //% block="Pop"
+    POP,
+    //% block="Left"
+    LEFT,
+    //% block="Right"
+    RIGHT,
     //% block="Flip"
-    FLIP = 324
+    FLIP
 }
 
 enum MOUTHS {
     //% block="Flat"
-    FLAT = 448,
-    //% block="Grin"
-    GRIN = 14880,
-    //% block="Hmmm"
-    HMMM = 14464,
-    //% block="Left"
-    LEFT = 6240,
+    FLAT,
     //% block="OK"
-    OK = 4416,
-    //% block="Open"
-    OPEN = 4420,
-    //% block="Right"
-    RIGHT = 13056,
-    //% block="Shout"
-    SHOUT = 14660,
+    OK,
+    //% block="Grin"
+    GRIN,
     //% block="Sulk"
-    SULK = 17856,
+    SULK,
+    //% block="Hmmm"
+    HMMM,
+    //% block="Open"
+    OPEN,
+    //% block="Left"
+    LEFT,
+    //% block="Right"
+    RIGHT,
+    //% block="Shout"
+    SHOUT,
     //% block="Laugh"
-    LAUGH = 15204,
+    LAUGH,
     //% block="Kiss"
-    KISS = 132,
+    KISS,
     //% block="Flip"
-    FLIP = 28512
+    FLIP
 }
 
-
 enum MOODS {
-    //% block="Snoring"
-    SNORING,
-    //% block="Asleep"
-    ASLEEP,
     //% block="None"
     NONE,
     //% block="Happy"
@@ -63,6 +58,10 @@ enum MOODS {
     ANGRY,
     //% block="Surprised"
     SURPRISED,
+    //% block="Asleep"
+    ASLEEP,
+    //% block="Snoring"
+    SNORING,
     //% block="Shiver"
     SHIVER,
     //% block="Tickle"
@@ -70,11 +69,38 @@ enum MOODS {
     //% block="Dead"
     DEAD
 }
-
-
-
 //% color="#4080e0" icon="\uf118"
 namespace Emote {
+
+// ensure these constants match the enum ordering!
+    const all_eyes = [
+        891,  //"Open"
+        874,  //"Sad"
+        864,  //"Shut"
+        347,  //"Mad"
+        27,   //"Up"
+        561,  //"Pop"
+        873,  //"Left"
+        882,  //"Right"
+        324   //"Flip"
+    ]
+
+    const all_mouths = [
+        448,    //"Flat"
+        4416,   //"OK"
+        14880,  //"Grin"
+        17856,  //"Sulk"
+        14464,  //"Hmmm"
+        4420,   //"Open"
+        13056,  //"Right"
+        14660,  //"Shout"
+        15204,  //"Laugh"
+        6240,   //"Left"
+        132,    //"Kiss"
+        28512   //"Flip"
+
+    ]
+
     class Face {
         eyes: EYES;
         mouth: MOUTHS;
@@ -87,7 +113,8 @@ namespace Emote {
         build(eyes: EYES, mouth: MOUTHS) {
             this.eyes = eyes
             this.mouth = mouth
-            this.pixels = this.mouth * 1024 + this.eyes
+            this.pixels = all_mouths[this.mouth] * 1024 
+                        + all_eyes[this.eyes]
         }
         show() {
             let pixels = this.pixels
