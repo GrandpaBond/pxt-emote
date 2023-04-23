@@ -102,7 +102,6 @@ namespace Emote {
         6240,   //"Left"
         132,    //"Kiss"
         28512   //"Flip"
-
     ]
 
     class Face {
@@ -117,7 +116,9 @@ namespace Emote {
         build(eyes: EYES, mouth: MOUTHS) {
             this.eyes = eyes
             this.mouth = mouth
-            this.pixels = all_mouths[this.mouth] << 10 + all_eyes[this.eyes]
+            this.pixels = all_mouths[this.mouth]
+            this.pixels <<= 10
+            this.pixels += all_eyes[this.eyes]
         }
         show() {
             let bitmap:number = this.pixels
@@ -185,32 +186,39 @@ namespace Emote {
         }
         if (m == MOODS.DEAD) {
             basic.showIcon(IconNames.Skull)
-        } else {
-            Face1.show()
-        }
+        } 
+    }
 
+    //% block="Stop reacting"
+    export function cease() {
+        switching = false
     }
 
     function set_mood(eyes: EYES, mouth: MOUTHS, other_eyes: EYES, other_mouth: MOUTHS, gap: number, time: number, vary: number) {
         switching = false
         Face1.build(eyes, mouth)
         Face2.build(other_eyes, other_mouth)
-        // In most moods, we temporarily switch between two faces.
+        // In most moods, we sporadically switch between two faces.
         // So we may be blinking, snoring, shivering or laughing etc.
         // These are controlled by two time-periods: "switch_gap" governs how often, 
-        // and "switch_time" says how long to show the alternate face.
-        // A non-zero "switch_vary" allows for an unpredictable multiple of gap times. 
+        //    and "switch_time" says how long, --to show the alternate face.
+        // A non-zero "switch_vary" allows for extension of the gap
+        //    by an unpredictable multiple. 
         switch_gap = gap
         switch_time = time
         switch_vary = vary
         switching = true
+        Face1.show()
         control.inBackground(function () {
             while (switching) {
-                pause(switch_gap + randint(0, switch_vary) * switch_gap)
                 Face2.show()
                 pause(switch_time)
                 Face1.show()
+                pause(switch_gap + randint(0, switch_vary) * switch_gap)
             }
         })
     }
 }
+Emote.new_mood(MOODS.NONE)
+basic.pause(5000)
+Emote.cease()
