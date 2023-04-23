@@ -96,10 +96,10 @@ namespace Emote {
         17856,  //"Sulk"
         14464,  //"Hmmm"
         4420,   //"Open"
+        6240,   //"Left"
         13056,  //"Right"
         14660,  //"Shout"
         15204,  //"Laugh"
-        6240,   //"Left"
         132,    //"Kiss"
         28512   //"Flip"
     ]
