@@ -219,6 +219,3 @@ namespace Emote {
         })
     }
 }
-Emote.new_mood(MOODS.NONE)
-basic.pause(5000)
-Emote.cease()
