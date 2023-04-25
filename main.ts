@@ -108,17 +108,21 @@ namespace Emote {
     let switch_vary = 0
 
     //% block="Show eyes as $eyes"
+    //% weight=20
     export function show_eyes(eyes: EYES) {
         switching = false
         show_bitmap(all_eyes[eyes], 0, 2)
     }
+
     //% block="Show mouth as $mouth"
+    //% weight=10
     export function show_mouth(mouth: MOUTHS) {
         switching = false
         show_bitmap(all_mouths[mouth], 2, 5)
     }
 
     //% block="Show face with eyes= $eyes, mouth= $mouth"
+    //% weight=30
     export function emote(eyes: EYES, mouth: MOUTHS) {
         switching = false
         show_bitmap(all_eyes[eyes], 0, 2)
@@ -126,6 +130,7 @@ namespace Emote {
     }
 
     //% block="React as $mood"
+    //% weight=50
     export function new_mood(mood: MOODS) {
         // constrain to currently defined values
         if (mood == MOODS.SNORING) {
@@ -153,6 +158,7 @@ namespace Emote {
     }
 
     //% block="Stop reacting"
+    //% weight=40
     export function cease() {
         switching = false
     }
@@ -188,6 +194,7 @@ namespace Emote {
             }
         })
     }
+    
     function show_bitmap(bitmap: number, start: number, stop: NumberFormat) {
         for (let y = start; y < stop; y++) {
             for (let x = 0; x < 5; x++) {
