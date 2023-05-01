@@ -16,6 +16,8 @@ enum EYES {
     LEFT,
     //% block="Right"
     RIGHT,
+    //% block="Wink"
+    WINK,
     //% block="Flip"
     FLIP
 }
@@ -40,6 +42,8 @@ enum MOUTHS {
     SHOUT,
     //% block="Laugh"
     LAUGH,
+    //% block="Smirk"
+    SMIRK,
     //% block="Kiss"
     KISS,
     //% block="Flip"
@@ -80,6 +84,7 @@ namespace Emote {
         561,  //"Pop"
         873,  //"Left"
         882,  //"Right"
+        867,  //"Wink"
         324   //"Flip"
     ]
 
@@ -94,6 +99,7 @@ namespace Emote {
         13056,  //"Right"
         14660,  //"Shout"
         15204,  //"Laugh"
+        6944,   //"Smirk"
         132,    //"Kiss"
         28512   //"Flip"
     ]
@@ -140,7 +146,7 @@ namespace Emote {
         } else if (mood == MOODS.NONE) {
             set_mood(EYES.OPEN, MOUTHS.FLAT, EYES.SHUT, MOUTHS.FLAT, 600, 300, 2)
         } else if (mood == MOODS.HAPPY) {
-            set_mood(EYES.OPEN, MOUTHS.GRIN, EYES.UP, MOUTHS.KISS, 1500, 400, 2)
+            set_mood(EYES.OPEN, MOUTHS.GRIN, EYES.WINK, MOUTHS.SMIRK, 1500, 400, 2)
         } else if (mood == MOODS.SAD) {
             set_mood(EYES.SAD, MOUTHS.SULK, EYES.SHUT, MOUTHS.SULK, 4000, 600, 1)
         } else if (mood == MOODS.ANGRY) {
