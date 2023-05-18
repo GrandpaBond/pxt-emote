@@ -100,7 +100,7 @@ namespace Emote {
         14660,  //"Shout"
         15204,  //"Laugh"
         6944,   //"Smirk"
-        132,    //"Kiss"
+        128,    //"Kiss"
         28512   //"Flip"
     ]
 
