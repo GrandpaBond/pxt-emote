@@ -73,7 +73,7 @@ enum MOODS {
 namespace Emote {
 
     // ensure these constants match the enum ordering!
-    const all_eyes = [
+    const allEyes = [
         891,  //"Open"
         874,  //"Sad"
         864,  //"Shut"
@@ -86,7 +86,7 @@ namespace Emote {
         324   //"Flip"
     ]
 
-    const all_mouths = [
+    const allMouths = [
         448,    //"Flat"
         4416,   //"OK"
         14880,  //"Grin"
@@ -102,59 +102,60 @@ namespace Emote {
         28512   //"Flip"
     ]
 
-    let main_eyes = 0
-    let main_mouth = 0
-    let alt_eyes = 0
-    let alt_mouth = 0
+    let mainEyes = 0
+    let mainMouth = 0
+    let altEyes = 0
+    let altMouth = 0
     let switching = false
-    let switch_gap = 0;
-    let switch_time = 0
-    let switch_vary = 0
+    let switchGap = 0;
+    let switchTime = 0
+    let switchVary = 0
 
     //% block="show eyes as $eyes"
     //% weight=20
-    export function show_eyes(eyes: EYES) {
+    export function showEyes(eyes: EYES) {
         switching = false
-        show_bitmap(all_eyes[eyes], 0, 2)
+        showBitmap(allEyes[eyes], 0, 2)
     }
 
     //% block="show mouth as $mouth"
     //% weight=10
     export function show_mouth(mouth: MOUTHS) {
         switching = false
-        show_bitmap(all_mouths[mouth], 2, 5)
+        showBitmap(allMouths[mouth], 2, 5)
     }
 
     //% block="show face with eyes= $eyes, mouth= $mouth"
     //% weight=30
     export function emote(eyes: EYES, mouth: MOUTHS) {
         switching = false
-        show_bitmap(all_eyes[eyes], 0, 2)
-        show_bitmap(all_mouths[mouth], 2, 5)
+        showBitmap(allEyes[eyes], 0, 2)
+        showBitmap(allMouths[mouth], 2, 5)
     }
 
     //% block="react as $mood"
     //% weight=50
-    export function new_mood(mood: MOODS) {
-        // constrain to currently defined values
+    export function newMood(mood: MOODS) {
+        // constrain using ENUMs to the currently defined values.
+        // params are: basic eyes/mouth;  alternate eyes/mouth;  switch gap/time/multiple
         if (mood == MOODS.SNORING) {
-            set_mood(EYES.SHUT, MOUTHS.FLAT, EYES.SHUT, MOUTHS.OPEN, 2000, 2000, 0)
+            setMood(EYES.SHUT, MOUTHS.FLAT, EYES.SHUT, MOUTHS.OPEN, 2000, 2000, 0)
         } else if (mood == MOODS.ASLEEP) {
-            set_mood(EYES.SHUT, MOUTHS.FLAT, EYES.SHUT, MOUTHS.HMMM, 3000, 500, 0)
+            setMood(EYES.SHUT, MOUTHS.FLAT, EYES.SHUT, MOUTHS.HMMM, 3000, 500, 0)
         } else if (mood == MOODS.NONE) {
-            set_mood(EYES.OPEN, MOUTHS.FLAT, EYES.SHUT, MOUTHS.FLAT, 600, 300, 2)
+            setMood(EYES.OPEN, MOUTHS.FLAT, EYES.SHUT, MOUTHS.FLAT, 600, 300, 2)
         } else if (mood == MOODS.HAPPY) {
-            set_mood(EYES.OPEN, MOUTHS.GRIN, EYES.WINK, MOUTHS.SMIRK, 1500, 400, 2)
+            setMood(EYES.OPEN, MOUTHS.GRIN, EYES.WINK, MOUTHS.SMIRK, 1500, 400, 2)
         } else if (mood == MOODS.SAD) {
-            set_mood(EYES.SAD, MOUTHS.SULK, EYES.SHUT, MOUTHS.SULK, 4000, 600, 1)
+            setMood(EYES.SAD, MOUTHS.SULK, EYES.SHUT, MOUTHS.HMMM, 4000, 600, 1)
         } else if (mood == MOODS.ANGRY) {
-            set_mood(EYES.MAD, MOUTHS.HMMM, EYES.MAD, MOUTHS.SHOUT, 2000, 800, 1)
+            setMood(EYES.MAD, MOUTHS.HMMM, EYES.MAD, MOUTHS.SHOUT, 600, 800, 3)
         } else if (mood == MOODS.SURPRISED) {
-            set_mood(EYES.POP, MOUTHS.OPEN, EYES.OPEN, MOUTHS.OPEN, 1600, 400, 0)
+            setMood(EYES.POP, MOUTHS.OPEN, EYES.OPEN, MOUTHS.OPEN, 1600, 400, 0)
         } else if (mood == MOODS.SHIVER) {
-            set_mood(EYES.LEFT, MOUTHS.RIGHT, EYES.RIGHT, MOUTHS.LEFT, 150, 150, 0)
+            setMood(EYES.LEFT, MOUTHS.RIGHT, EYES.RIGHT, MOUTHS.LEFT, 140, 140, 0)
         } else if (mood == MOODS.TICKLE) {
-            set_mood(EYES.OPEN, MOUTHS.OK, EYES.FLIP, MOUTHS.FLIP, 750, 250, 0)
+            setMood(EYES.OPEN, MOUTHS.OK, EYES.FLIP, MOUTHS.FLIP, 750, 250, 0)
         }
         if (mood == MOODS.DEAD) {
             basic.showIcon(IconNames.Skull)
@@ -167,39 +168,39 @@ namespace Emote {
         switching = false
     }
 
-    function set_mood(eyes: EYES, mouth: MOUTHS, other_eyes: EYES, other_mouth: MOUTHS, gap: number, time: number, vary: number) {
+    function setMood(eyes: EYES, mouth: MOUTHS, otherEyes: EYES, otherMouth: MOUTHS, gap: number, time: number, vary: number) {
         switching = false
-        main_eyes = eyes
-        main_mouth = mouth
-        alt_eyes = other_eyes
-        alt_mouth = other_mouth
+        mainEyes = eyes
+        mainMouth = mouth
+        altEyes = otherEyes
+        altMouth = otherMouth
         /*
         In most moods, we sporadically switch between two faces.
         So we may be blinking, snoring, shivering or laughing etc.
-        These are controlled by two time-periods: "switch_gap" governs how often, 
-            and "switch_time" says how long, --to show the alternate Face2.
-        A non-zero "switch_vary" allows for extension of the gap
+        These are controlled by two time-periods: "switchGap" governs how often, 
+            and "switchTime" says how long, --to show the alternate face.
+        A non-zero "switchVary" allows for extension of the gap
             by an unpredictable multiple.
         */
-        switch_gap = gap
-        switch_time = time
-        switch_vary = vary
+        switchGap = gap
+        switchTime = time
+        switchVary = vary
         switching = true
-        show_bitmap(all_eyes[main_eyes], 0, 2)
-        show_bitmap(all_mouths[main_mouth], 2, 5)
+        showBitmap(allEyes[mainEyes], 0, 2)
+        showBitmap(allMouths[mainMouth], 2, 5)
         control.inBackground(function () {
             while (switching) {
-                show_bitmap(all_eyes[alt_eyes], 0, 2)
-                show_bitmap(all_mouths[alt_mouth], 2, 5)
-                pause(switch_time)
-                show_bitmap(all_eyes[main_eyes], 0, 2)
-                show_bitmap(all_mouths[main_mouth], 2, 5)
-                pause(switch_gap + randint(0, switch_vary) * switch_gap)
+                showBitmap(allEyes[altEyes], 0, 2)
+                showBitmap(allMouths[altMouth], 2, 5)
+                pause(switchTime)
+                showBitmap(allEyes[mainEyes], 0, 2)
+                showBitmap(allMouths[mainMouth], 2, 5)
+                pause(switchGap + randint(0, switchVary) * switchGap)
             }
         })
     }
     
-    function show_bitmap(bitmap: number, start: number, stop: NumberFormat) {
+    function showBitmap(bitmap: number, start: number, stop: NumberFormat) {
         for (let y = start; y < stop; y++) {
             for (let x = 0; x < 5; x++) {
                 if (bitmap & 1) {
