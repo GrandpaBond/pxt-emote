@@ -9,7 +9,7 @@ input.onButtonPressed(Button.AB, function () {
     while (input.buttonIsPressed(Button.AB)) {
         basic.pause(100)
     }
-    next_mood()
+    nextMood()
 })
 input.onButtonPressed(Button.B, function () {
     while (input.buttonIsPressed(Button.B)) {
@@ -19,30 +19,30 @@ input.onButtonPressed(Button.B, function () {
 })
 function next_eyes() {
     if (flipped) {
-        Emote.show_mouth(MOUTHS.FLAT)
+        emote.showMouth(MOUTHS.FLAT)
         flipped = false
     }
     if (eyes == 0) {
-        Emote.show_eyes(EYES.OPEN)
+        emote.showEyes(EYES.OPEN)
     } else if (eyes == 1) {
-        Emote.show_eyes(EYES.SAD)
+        emote.showEyes(EYES.SAD)
     } else if (eyes == 2) {
-        Emote.show_eyes(EYES.SHUT)
+        emote.showEyes(EYES.SHUT)
     } else if (eyes == 3) {
-        Emote.show_eyes(EYES.MAD)
+        emote.showEyes(EYES.MAD)
     } else if (eyes == 4) {
-        Emote.show_eyes(EYES.UP)
+        emote.showEyes(EYES.UP)
     } else if (eyes == 5) {
-        Emote.show_eyes(EYES.POP)
+        emote.showEyes(EYES.POP)
     } else if (eyes == 6) {
-        Emote.show_eyes(EYES.LEFT)
+        emote.showEyes(EYES.LEFT)
     } else if (eyes == 7) {
-        Emote.show_eyes(EYES.RIGHT)
+        emote.showEyes(EYES.RIGHT)
     } else if (eyes == 8) {
-        Emote.show_eyes(EYES.WINK)
+        emote.showEyes(EYES.WINK)
     } else if (eyes == 9) {
-        Emote.show_eyes(EYES.FLIP)
-        Emote.show_mouth(MOUTHS.FLIP)
+        emote.showEyes(EYES.FLIP)
+        emote.showMouth(MOUTHS.FLIP)
         flipped = true
         eyes = -1
     }
@@ -50,66 +50,66 @@ function next_eyes() {
 }
 function next_mouth() {
     if (flipped) {
-        Emote.show_eyes(EYES.OPEN)
+        emote.showEyes(EYES.OPEN)
         flipped = false
     }
     if (mouth == 0) {
-        Emote.show_mouth(MOUTHS.FLAT)
+        emote.showMouth(MOUTHS.FLAT)
     } else if (mouth == 1) {
-        Emote.show_mouth(MOUTHS.OK)
+        emote.showMouth(MOUTHS.OK)
     } else if (mouth == 2) {
-        Emote.show_mouth(MOUTHS.GRIN)
+        emote.showMouth(MOUTHS.GRIN)
     } else if (mouth == 3) {
-        Emote.show_mouth(MOUTHS.SULK)
+        emote.showMouth(MOUTHS.SULK)
     } else if (mouth == 4) {
-        Emote.show_mouth(MOUTHS.HMMM)
+        emote.showMouth(MOUTHS.HMMM)
     } else if (mouth == 5) {
-        Emote.show_mouth(MOUTHS.OPEN)
+        emote.showMouth(MOUTHS.OPEN)
     } else if (mouth == 6) {
-        Emote.show_mouth(MOUTHS.LEFT)
+        emote.showMouth(MOUTHS.LEFT)
     } else if (mouth == 7) {
-        Emote.show_mouth(MOUTHS.RIGHT)
+        emote.showMouth(MOUTHS.RIGHT)
     } else if (mouth == 8) {
-        Emote.show_mouth(MOUTHS.SHOUT)
+        emote.showMouth(MOUTHS.SHOUT)
     } else if (mouth == 9) {
-        Emote.show_mouth(MOUTHS.LAUGH)
+        emote.showMouth(MOUTHS.LAUGH)
     } else if (mouth == 10) {
-        Emote.show_mouth(MOUTHS.KISS)
+        emote.showMouth(MOUTHS.KISS)
     } else if (mouth == 11) {
-        Emote.show_mouth(MOUTHS.SMIRK)
+        emote.showMouth(MOUTHS.SMIRK)
     } else if (mouth == 12) {
-        Emote.show_eyes(EYES.FLIP)
-        Emote.show_mouth(MOUTHS.FLIP)
+        emote.showEyes(EYES.FLIP)
+        emote.showMouth(MOUTHS.FLIP)
         flipped = true
         mouth = -1
     }
     mouth += 1
 }
-function next_mood() {
+function nextMood() {
     if (mood == 0) {
-        Emote.new_mood(MOODS.NONE)
+        emote.newMood(MOODS.NONE)
     } else if (mood == 1) {
-        Emote.new_mood(MOODS.HAPPY)
+        emote.newMood(MOODS.HAPPY)
     } else if (mood == 2) {
-        Emote.new_mood(MOODS.SAD)
+        emote.newMood(MOODS.SAD)
     } else if (mood == 3) {
-        Emote.new_mood(MOODS.ANGRY)
+        emote.newMood(MOODS.ANGRY)
     } else if (mood == 4) {
-        Emote.new_mood(MOODS.SURPRISED)
+        emote.newMood(MOODS.SURPRISED)
     } else if (mood == 5) {
-        Emote.new_mood(MOODS.ASLEEP)
+        emote.newMood(MOODS.ASLEEP)
     } else if (mood == 6) {
-        Emote.new_mood(MOODS.SNORING)
+        emote.newMood(MOODS.SNORING)
     } else if (mood == 7) {
-        Emote.new_mood(MOODS.SHIVER)
+        emote.newMood(MOODS.SHIVER)
     } else if (mood == 8) {
-        Emote.new_mood(MOODS.TICKLE)
+        emote.newMood(MOODS.TICKLE)
     } else if (mood == 9) {
-        Emote.new_mood(MOODS.DEAD)
+        emote.newMood(MOODS.DEAD)
         mood = -1
     }
     basic.pause(10000)
-    Emote.cease()
+    emote.cease()
     basic.pause(1000)
     reset()
     mood += 1

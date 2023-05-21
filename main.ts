@@ -70,7 +70,7 @@ enum MOODS {
     //% block="Dead"
     DEAD
 }
-namespace Emote {
+namespace emote {
 
     // ensure these constants match the enum ordering!
     const allEyes = [
@@ -120,7 +120,7 @@ namespace Emote {
 
     //% block="show mouth as $mouth"
     //% weight=10
-    export function show_mouth(mouth: MOUTHS) {
+    export function showMouth(mouth: MOUTHS) {
         switching = false
         showBitmap(allMouths[mouth], 2, 5)
     }
@@ -147,7 +147,7 @@ namespace Emote {
         } else if (mood == MOODS.HAPPY) {
             setMood(EYES.OPEN, MOUTHS.GRIN, EYES.WINK, MOUTHS.SMIRK, 1500, 400, 2)
         } else if (mood == MOODS.SAD) {
-            setMood(EYES.SAD, MOUTHS.SULK, EYES.SHUT, MOUTHS.HMMM, 4000, 600, 1)
+            setMood(EYES.SAD, MOUTHS.SULK, EYES.SHUT, MOUTHS.HMMM, 2000, 600, 1)
         } else if (mood == MOODS.ANGRY) {
             setMood(EYES.MAD, MOUTHS.HMMM, EYES.MAD, MOUTHS.SHOUT, 600, 800, 3)
         } else if (mood == MOODS.SURPRISED) {
