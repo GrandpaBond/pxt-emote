@@ -1,4 +1,3 @@
-
 enum EYES {
     //% block="Open"
     OPEN,
@@ -71,7 +70,6 @@ enum MOODS {
     //% block="Dead"
     DEAD
 }
-//% color="#4080e0" icon="\uf118"
 namespace Emote {
 
     // ensure these constants match the enum ordering!
@@ -113,21 +111,21 @@ namespace Emote {
     let switch_time = 0
     let switch_vary = 0
 
-    //% block="Show eyes as $eyes"
+    //% block="show eyes as $eyes"
     //% weight=20
     export function show_eyes(eyes: EYES) {
         switching = false
         show_bitmap(all_eyes[eyes], 0, 2)
     }
 
-    //% block="Show mouth as $mouth"
+    //% block="show mouth as $mouth"
     //% weight=10
     export function show_mouth(mouth: MOUTHS) {
         switching = false
         show_bitmap(all_mouths[mouth], 2, 5)
     }
 
-    //% block="Show face with eyes= $eyes, mouth= $mouth"
+    //% block="show face with eyes= $eyes, mouth= $mouth"
     //% weight=30
     export function emote(eyes: EYES, mouth: MOUTHS) {
         switching = false
@@ -135,7 +133,7 @@ namespace Emote {
         show_bitmap(all_mouths[mouth], 2, 5)
     }
 
-    //% block="React as $mood"
+    //% block="react as $mood"
     //% weight=50
     export function new_mood(mood: MOODS) {
         // constrain to currently defined values
@@ -163,7 +161,7 @@ namespace Emote {
         }
     }
 
-    //% block="Stop reacting"
+    //% block="stop reacting"
     //% weight=40
     export function cease() {
         switching = false
