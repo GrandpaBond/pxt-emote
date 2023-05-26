@@ -1,3 +1,7 @@
+
+//% color=#402080 weight=100 icon="\uf4da" block="emote"
+
+
 enum EYES {
     //% block="Open"
     OPEN,
@@ -65,13 +69,12 @@ enum MOODS {
     SNORING,
     //% block="Shiver"
     SHIVER,
-    //% block="Tickle"
-    TICKLE,
+    //% block="Tickled"
+    TICKLED,
     //% block="Dead"
     DEAD
 }
 namespace emote {
-
     // ensure these constants match the enum ordering!
     const allEyes = [
         891,  //"Open"
@@ -111,6 +114,13 @@ namespace emote {
     let switchTime = 0
     let switchVary = 0
 
+
+    /**
+     * Show the selected eyes on the LED display.
+     * @param eyes choice of eyes
+     */
+    //% blockId=emote_showEyes
+    //     % help=emote/showEyes
     //% block="show eyes as $eyes"
     //% weight=20
     export function showEyes(eyes: EYES) {
@@ -118,6 +128,12 @@ namespace emote {
         showBitmap(allEyes[eyes], 0, 2)
     }
 
+    /**
+     * Show the selected mouth on the LED display.
+     * @param mouth choice of mouth
+     */
+    //% blockId=emote_showMouth
+    //     % help=emote/showMouth
     //% block="show mouth as $mouth"
     //% weight=10
     export function showMouth(mouth: MOUTHS) {
@@ -125,14 +141,27 @@ namespace emote {
         showBitmap(allMouths[mouth], 2, 5)
     }
 
+    /**
+     * Show the selected face on the LED display.
+     * @param eyes choice of eyes
+     * @param mouth choice of mouth
+     */
+    //% blockId=emote_showFace
+    //     % help=emote/showFace
     //% block="show face with eyes= $eyes, mouth= $mouth"
     //% weight=30
-    export function emote(eyes: EYES, mouth: MOUTHS) {
+    export function showFace(eyes: EYES, mouth: MOUTHS) {
         switching = false
         showBitmap(allEyes[eyes], 0, 2)
         showBitmap(allMouths[mouth], 2, 5)
     }
 
+    /**
+     * Start reacting in the chosen mood with an animated facial expression.
+     * @param mood choice of mood
+     */
+    //% blockId=emote_newMood
+    //     % help=emote/newMood
     //% block="react as $mood"
     //% weight=50
     export function newMood(mood: MOODS) {
@@ -154,7 +183,7 @@ namespace emote {
             setMood(EYES.POP, MOUTHS.OPEN, EYES.OPEN, MOUTHS.OPEN, 1600, 400, 0)
         } else if (mood == MOODS.SHIVER) {
             setMood(EYES.LEFT, MOUTHS.RIGHT, EYES.RIGHT, MOUTHS.LEFT, 140, 140, 0)
-        } else if (mood == MOODS.TICKLE) {
+        } else if (mood == MOODS.TICKLED) {
             setMood(EYES.OPEN, MOUTHS.OK, EYES.FLIP, MOUTHS.FLIP, 750, 250, 0)
         }
         if (mood == MOODS.DEAD) {
@@ -162,26 +191,32 @@ namespace emote {
         }
     }
 
+    /**
+     * Stop the current animated reaction.
+     */
+    //% blockId=emote_cease
+    //     % help=emote/cease
     //% block="stop reacting"
     //% weight=40
     export function cease() {
         switching = false
     }
 
+    /*
+    In most moods, we sporadically switch between two faces.
+    So we may be blinking, snoring, shivering or laughing etc.
+    Display of the alternate face is controlled by two time-periods: 
+    "switchGap" governs how often; and "switchTime" says how long.
+    A non-zero "switchVary" introduce some randomness, by extending 
+    the gap by an unpredictable multiple.
+    */
     function setMood(eyes: EYES, mouth: MOUTHS, otherEyes: EYES, otherMouth: MOUTHS, gap: number, time: number, vary: number) {
         switching = false
         mainEyes = eyes
         mainMouth = mouth
         altEyes = otherEyes
         altMouth = otherMouth
-        /*
-        In most moods, we sporadically switch between two faces.
-        So we may be blinking, snoring, shivering or laughing etc.
-        These are controlled by two time-periods: "switchGap" governs how often, 
-            and "switchTime" says how long, --to show the alternate face.
-        A non-zero "switchVary" allows for extension of the gap
-            by an unpredictable multiple.
-        */
+
         switchGap = gap
         switchTime = time
         switchVary = vary
@@ -199,8 +234,15 @@ namespace emote {
             }
         })
     }
-    
-    function showBitmap(bitmap: number, start: number, stop: NumberFormat) {
+/* Use the bitmap to plot LEDs on/off in a subset of display-rows 
+  (the top two for eyes; the bottom three for mouths).
+  To optimise performance, bits are mapped low-endian and row-wise in
+  groups of 5, (top-left pixel as the LSB; bottom-right pixels as the MSB). 
+  So for a 2-row pair of eyes, the pixel contributions are:
+            1   2   4   8  16
+            32  64 128 256 512
+*/
+    function showBitmap(bitmap: number, start: number, stop: number) {
         for (let y = start; y < stop; y++) {
             for (let x = 0; x < 5; x++) {
                 if (bitmap & 1) {

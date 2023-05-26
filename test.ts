@@ -103,7 +103,7 @@ function nextMood() {
     } else if (mood == 7) {
         emote.newMood(MOODS.SHIVER)
     } else if (mood == 8) {
-        emote.newMood(MOODS.TICKLE)
+        emote.newMood(MOODS.TICKLED)
     } else if (mood == 9) {
         emote.newMood(MOODS.DEAD)
         mood = -1
