@@ -10,8 +10,7 @@
         "main.blocks",
         "main.ts",
         "README.md",
-        "pxt-emote.ts",
-        "tests.ts"
+        "pxt-emote.ts"
     ],
     "testFiles": [
         "test.ts"

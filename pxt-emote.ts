@@ -1,7 +1,6 @@
 
 //% color=#402080 weight=100 icon="\uf4da" block="emote"
 
-
 enum EYES {
     //% block="Open"
     OPEN,
