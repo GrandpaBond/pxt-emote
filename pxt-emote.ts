@@ -35,6 +35,13 @@ namespace emote {
         128,    //"Kiss"
         28512   //"Flip"
     ];
+// pixel-map contributions for different sub-sets of eye pixels
+    const eyesUp = 1+2+8+16;
+    const eyesDown = 32 + 64 + 256 + 512;
+    const eyesLeft =1+8+32+256;
+    const eyesRight = 2+16+64+512;
+    const eyesIn = 2+8+64+256;
+    const eyesOut = 1+16+32+512;
 
 
     // ENUMS...
@@ -115,7 +122,7 @@ namespace emote {
         Dead
     };
 
-    enum UpDown {
+    enum EyesV {
         //% block="up"
         Up,
         //% block="level"
@@ -124,7 +131,7 @@ namespace emote {
         Down
     };
 
-    enum LeftRight {
+    enum EyesH {
         //% block="left"
         Left,
         //% block="ahead"
@@ -251,12 +258,31 @@ namespace emote {
      */
     //% block="look $upDown $leftRight"
     //% weight=30
-    export function look(upDown: UpDown, leftRight: LeftRight) {
+    export function look(upDown: EyesV, leftRight: EyesH) {
         switching = false;
+        let hMap = 0;
+        let vMap = 0;
         let eyeMap = 0;
         // work out which pixel sets to combine
         switch (upDown) {
-            case 0:
+            case EyesV.Up: vMap = eyesUp; 
+                break;
+            case 1: vMap = eyesUp + eyesDown;
+                break;
+            case 2: vMap = eyesDown;
+                break;
+            default: vMap = 0;
+                break;
+        }
+        switch (leftRight) {
+            case 0: hMap = eyesLeft;
+                break;
+            case 1: hMap = eyesLeft + Eyes;
+                break;
+            case 2: hMap = eyesRight;
+                break;
+            default: hMap = 0;
+                break;
         }
     }
 
