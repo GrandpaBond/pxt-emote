@@ -3,9 +3,7 @@
  */
 //% color=#402080 weight=100 icon="\uf4da" block="Emote"
 namespace emote {
-
     // CONSTANTS...    
-
     // ensure these constants match the enum orderings below!
     const allEyes = [
         891,  //"Open"
@@ -36,18 +34,22 @@ namespace emote {
         28512   //"Flip"
     ];
 // pixel-map contributions for different sub-sets of eye pixels
-    const eyesUp = 1+2+8+16;
+//    ( 1   2)   4  ( 8  16 )
+//    (32  64) 128  (256 512)
+
+    const eyesUp = 1 + 2 + 8 + 16;
     const eyesDown = 32 + 64 + 256 + 512;
-    const eyesLeft =1+8+32+256;
-    const eyesRight = 2+16+64+512;
-    const eyesIn = 2+8+64+256;
-    const eyesOut = 1+16+32+512;
+    const eyeLLeft = 1 + 32;
+    const eyeLRight = 2 + 64;
+    const eyeRLeft = 8 + 256;
+    const eyeRRight = 16 + 512;
+
 
 
     // ENUMS...
 
     // ensure these enums match the constant orderings above!
-    enum Eyes {
+    export enum Eyes {
         //% block="open"
         Open,
         //% block="sad"
@@ -70,7 +72,7 @@ namespace emote {
         Flip
     };
 
-    enum Mouths {
+    export enum Mouths {
         //% block="flat"
         Flat,
         //% block="ok"
@@ -99,7 +101,7 @@ namespace emote {
         Flip
     };
 
-    enum Moods {
+    export enum Moods {
         //% block="none"
         None,
         //% block="happy"
@@ -122,7 +124,7 @@ namespace emote {
         Dead
     };
 
-    enum EyesV {
+    export enum EyesV {
         //% block="up"
         Up,
         //% block="level"
@@ -131,7 +133,7 @@ namespace emote {
         Down
     };
 
-    enum EyesH {
+    export enum EyesH {
         //% block="left"
         Left,
         //% block="ahead"
@@ -143,6 +145,54 @@ namespace emote {
         //% block="outwards"
         Outwards
     };
+
+    /**
+     * Look in the chosen direction.
+     * @param upDown vertical eye-position
+     * @param leftRight horizontal eye-position
+     */
+    //% block="look $upDown $leftRight"
+    //% weight=30
+    export function look(upDown: EyesV, leftRight: EyesH) {
+        switching = false;
+        let hMap = 0;
+        let lvMap = 0;
+        let rvMap = 0;
+        let vMap = 0;
+        let eyeMap = 0;
+        // work out which pixel sets to combine
+        switch (upDown) {
+            case EyesV.Up: hMap = eyesUp;
+                break;
+            case EyesV.Level: hMap = 0;
+                break;
+            case EyesV.Down: hMap = eyesDown;
+                break;
+            default: hMap = 0;
+                break;
+        }
+        switch (leftRight) {
+            case EyesH.Left: 
+                vMap = eyeLLeft + eyeRLeft;
+                break;
+            case EyesH.Ahead:
+                vMap = eyeLLeft + eyeRLeft + eyeLRight + eyeRRight;
+                break;
+            case EyesH.Right:
+                vMap = eyeLRight + eyeRRight;
+                break;
+            case EyesH.Inwards:
+                vMap = eyeLRight + eyeRLeft;
+                break;
+            case EyesH.Outwards:
+                vMap = eyeLLeft + eyeRRight;
+                break;
+            default: vMap = 0;
+                break;
+        }
+        eyeMap = hMap & vMap;
+        showBitmap(eyeMap, 2, 0);
+    }
 
     // INITIALISE
 
@@ -249,41 +299,6 @@ namespace emote {
         switching = false;
         showBitmap(allEyes[eyes], 2, 0);
         showBitmap(allMouths[mouth], 3, 2);
-    }
-
-    /**
-     * Look in the chosen direction.
-     * @param upDown vertical eye-position
-     * @param leftRight horizontal eye-position
-     */
-    //% block="look $upDown $leftRight"
-    //% weight=30
-    export function look(upDown: EyesV, leftRight: EyesH) {
-        switching = false;
-        let hMap = 0;
-        let vMap = 0;
-        let eyeMap = 0;
-        // work out which pixel sets to combine
-        switch (upDown) {
-            case EyesV.Up: vMap = eyesUp; 
-                break;
-            case 1: vMap = eyesUp + eyesDown;
-                break;
-            case 2: vMap = eyesDown;
-                break;
-            default: vMap = 0;
-                break;
-        }
-        switch (leftRight) {
-            case 0: hMap = eyesLeft;
-                break;
-            case 1: hMap = eyesLeft + Eyes;
-                break;
-            case 2: hMap = eyesRight;
-                break;
-            default: hMap = 0;
-                break;
-        }
     }
 
 
