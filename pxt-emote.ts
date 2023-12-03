@@ -146,54 +146,6 @@ namespace emote {
         Outwards
     };
 
-    /**
-     * Look in the chosen direction.
-     * @param upDown vertical eye-position
-     * @param leftRight horizontal eye-position
-     */
-    //% block="look $upDown $leftRight"
-    //% weight=30
-    export function look(upDown: EyesV, leftRight: EyesH) {
-        switching = false;
-        let hMap = 0;
-        let lvMap = 0;
-        let rvMap = 0;
-        let vMap = 0;
-        let eyeMap = 0;
-        // work out which pixel sets to combine
-        switch (upDown) {
-            case EyesV.Up: hMap = eyesUp;
-                break;
-            case EyesV.Level: hMap = 0;
-                break;
-            case EyesV.Down: hMap = eyesDown;
-                break;
-            default: hMap = 0;
-                break;
-        }
-        switch (leftRight) {
-            case EyesH.Left: 
-                vMap = eyeLLeft + eyeRLeft;
-                break;
-            case EyesH.Ahead:
-                vMap = eyeLLeft + eyeRLeft + eyeLRight + eyeRRight;
-                break;
-            case EyesH.Right:
-                vMap = eyeLRight + eyeRRight;
-                break;
-            case EyesH.Inwards:
-                vMap = eyeLRight + eyeRLeft;
-                break;
-            case EyesH.Outwards:
-                vMap = eyeLLeft + eyeRRight;
-                break;
-            default: vMap = 0;
-                break;
-        }
-        eyeMap = hMap & vMap;
-        showBitmap(eyeMap, 2, 0);
-    }
-
     // INITIALISE
 
     let mainEyes = 0;
@@ -301,6 +253,53 @@ namespace emote {
         showBitmap(allMouths[mouth], 3, 2);
     }
 
+
+    /**
+     * Look in the chosen direction.
+     * @param upDown vertical eye-position
+     * @param leftRight horizontal eye-position
+     */
+    //% block="look $upDown $leftRight"
+    //% weight=30
+    export function look(upDown: EyesV, leftRight: EyesH) {
+        switching = false;
+        let eyeMap = 0;
+        if ((upDown == EyesV.Level) 
+        && (leftRight == EyesH.Ahead)) {
+            eyeMap = eyesUp + eyesDown;
+        } else {
+            let hMap = 0;
+            let vMap = 0;
+            // work out which pixel sets to combine
+            switch (upDown) {
+                case EyesV.Up: hMap = eyesUp;
+                    break;
+                case EyesV.Level: hMap = 0;
+                    break;
+                case EyesV.Down: hMap = eyesDown;
+                    break;
+            }
+            switch (leftRight) {
+                case EyesH.Left:
+                    vMap = eyeLLeft + eyeRLeft;
+                    break;
+                case EyesH.Ahead:
+                    vMap = 0;
+                    break;
+                case EyesH.Right:
+                    vMap = eyeLRight + eyeRRight;
+                    break;
+                case EyesH.Inwards:
+                    vMap = eyeLRight + eyeRLeft;
+                    break;
+                case EyesH.Outwards:
+                    vMap = eyeLLeft + eyeRRight;
+                    break;
+            }
+            eyeMap = hMap | vMap;
+        }
+        showBitmap(eyeMap, 2, 0);
+    }
 
     /**
      * Start reacting in the chosen mood with an animated facial expression.
