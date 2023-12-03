@@ -36,13 +36,13 @@ namespace emote {
 // pixel-map contributions for different sub-sets of eye pixels
 //    ( 1   2)   4  ( 8  16 )
 //    (32  64) 128  (256 512)
-
-    const eyesUp = 1 + 2 + 8 + 16;
-    const eyesDown = 32 + 64 + 256 + 512;
-    const eyeLLeft = 1 + 32;
-    const eyeLRight = 2 + 64;
-    const eyeRLeft = 8 + 256;
-    const eyeRRight = 16 + 512;
+    const eyeUp = 1 + 2;
+    const eyeDown = 32 + 64;
+    const eyeLeft = 1 + 32;
+    const eyeRight = 2 + 64;
+    const eyeAll = 1 + 2 + 32 + 64;
+// for right-eye use (map << 3)
+    
 
 
 
@@ -64,7 +64,7 @@ namespace emote {
         Pop,
         //% block="left"
         Left,
-        //% block="Right"
+        //% block="right"
         Right,
         //% block="wink"
         Wink,
@@ -87,7 +87,7 @@ namespace emote {
         Open,
         //% block="left"
         Left,
-        //% block="Right"
+        //% block="right"
         Right,
         //% block="shout"
         Shout,
@@ -146,13 +146,30 @@ namespace emote {
         Outwards
     };
 
+    class Face {
+        eyeMapL: number;
+        eyeMapR: number;
+        mouthMap: number;
+        mood: Moods;
+
+        constructor(leftEye: number, 
+                    rightEye: number,
+                    mouth: number) {
+            this.eyeMapL = leftEye;
+            this.eyeMapR = rightEye;
+            this.mouthMap = mouth;
+        }
+        
+    }
+
     // INITIALISE
 
+    let mainFace: Face = new Face(eyeAll, eyeAll, allMouths[0]);
     let mainEyes = 0;
     let mainMouth = 0;
     let altEyes = 0;
     let altMouth = 0;
-    let switching = false;
+    let canReact = false;
     let switchGap = 0;
     let switchTime = 0;
     let switchVary = 0;
@@ -189,7 +206,7 @@ namespace emote {
 
     function setMood(eyes: Eyes, mouth: Mouths, otherEyes: Eyes, otherMouth: Mouths,
         gap: number, time: number, vary: number) {
-        switching = false;
+        canReact = false;
         mainEyes = eyes;
         mainMouth = mouth;
         altEyes = otherEyes;
@@ -198,15 +215,15 @@ namespace emote {
         switchGap = gap;
         switchTime = time;
         switchVary = vary;
-        switching = true;
+        canReact = true;
         showBitmap(allEyes[mainEyes], 0, 2);
         showBitmap(allMouths[mainMouth], 2, 5);
 
         control.inBackground(function () { animate() });
     }
-
+// background animation handles repeated periodic reactions reflecting Moods
     function animate(): void {
-        while (switching) {
+        while (canReact) {
             showBitmap(allEyes[altEyes], 2, 0);
             showBitmap(allMouths[altMouth], 3, 2);
             pause(switchTime);
@@ -225,7 +242,7 @@ namespace emote {
     //% block="show eyes as $eyes"
     //% weight=20
     export function showEyes(eyes: Eyes) {
-        switching = false;
+        canReact = false;
         showBitmap(allEyes[eyes], 2, 0);
     }
 
@@ -236,7 +253,7 @@ namespace emote {
     //% block="show mouth as $mouth"
     //% weight=10
     export function showMouth(mouth: Mouths) {
-        switching = false;
+        canReact = false;
         showBitmap(allMouths[mouth], 3, 2);
     }
 
@@ -248,7 +265,7 @@ namespace emote {
     //% block="show face with eyes= $eyes, mouth= $mouth"
     //% weight=30
     export function showFace(eyes: Eyes, mouth: Mouths) {
-        switching = false;
+        canReact = false;
         showBitmap(allEyes[eyes], 2, 0);
         showBitmap(allMouths[mouth], 3, 2);
     }
@@ -259,44 +276,40 @@ namespace emote {
      * @param upDown vertical eye-position
      * @param leftRight horizontal eye-position
      */
-    //% block="look $upDown $leftRight"
+    //% block="look $upDown $leftRight|| for $ms ms"
+    //% inlineInputMode=inline
+    //% expandableArgumentMode="enabled"
     //% weight=30
-    export function look(upDown: EyesV, leftRight: EyesH) {
-        switching = false;
+    export function look(upDown: EyesV, leftRight: EyesH, ms = 0) {
+        canReact = false;
         let eyeMap = 0;
-        if ((upDown == EyesV.Level) 
-        && (leftRight == EyesH.Ahead)) {
-            eyeMap = eyesUp + eyesDown;
+        if ((upDown == EyesV.Level) && (leftRight == EyesH.Ahead)) {
+            eyeMap = eyeAll + (eyeAll << 3);
         } else {
-            let hMap = 0;
-            let vMap = 0;
-            // work out which pixel sets to combine
             switch (upDown) {
-                case EyesV.Up: hMap = eyesUp;
+                case EyesV.Up: eyeMap = eyeUp + (eyeUp << 3);
                     break;
-                case EyesV.Level: hMap = 0;
+                case EyesV.Level:
                     break;
-                case EyesV.Down: hMap = eyesDown;
+                case EyesV.Down: eyeMap = eyeDown + (eyeDown << 3);
                     break;
             }
             switch (leftRight) {
                 case EyesH.Left:
-                    vMap = eyeLLeft + eyeRLeft;
+                    eyeMap |= eyeLeft + (eyeLeft << 3);
                     break;
                 case EyesH.Ahead:
-                    vMap = 0;
                     break;
                 case EyesH.Right:
-                    vMap = eyeLRight + eyeRRight;
+                    eyeMap |= eyeRight + (eyeRight << 3);
                     break;
                 case EyesH.Inwards:
-                    vMap = eyeLRight + eyeRLeft;
+                    eyeMap |= eyeRight + (eyeLeft << 3);
                     break;
                 case EyesH.Outwards:
-                    vMap = eyeLLeft + eyeRRight;
+                    eyeMap |= eyeLeft + (eyeRight << 3);
                     break;
             }
-            eyeMap = hMap | vMap;
         }
         showBitmap(eyeMap, 2, 0);
     }
@@ -336,13 +349,20 @@ namespace emote {
     }
 
     /**
+     * Stop any current animated reaction.
+     */
+    //% block="stop reacting"
+    //% weight=40
+    export function rollEyes() {
+        canReact = false;
+    }
+
+    /**
      * Stop the current animated reaction.
      */
-    //% blockId=emote_cease
-    //% help=emote/cease
     //% block="stop reacting"
     //% weight=40
     export function cease() {
-        switching = false;
+        canReact = false;
     }
 }
