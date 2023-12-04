@@ -33,18 +33,15 @@ namespace emote {
         128,    //"Kiss"
         28512   //"Flip"
     ];
-// pixel-map contributions for different sub-sets of eye pixels
-//    ( 1   2)   4  ( 8  16 )
-//    (32  64) 128  (256 512)
+    // pixel-map contributions for different sub-sets of eye pixels
+    //    ( 1   2)   4  ( 8  16 )
+    //    (32  64) 128  (256 512)
+    // left-eye maps (for right-eye use {map} << 3)
     const eyeUp = 1 + 2;
     const eyeDown = 32 + 64;
     const eyeLeft = 1 + 32;
     const eyeRight = 2 + 64;
     const eyeAll = 1 + 2 + 32 + 64;
-// for right-eye use (map << 3)
-    
-
-
 
     // ENUMS...
 
@@ -146,11 +143,24 @@ namespace emote {
         Outwards
     };
 
+    export enum Spin {
+        //% block="clockwise"
+        Screw,
+        //% block="anti-clockwise"
+        Unscrew
+    };
+
+    enum Glances {
+
+    };
+
+
+
+// a Face is an expression
     class Face {
         eyeMapL: number;
         eyeMapR: number;
         mouthMap: number;
-        mood: Moods;
 
         constructor(leftEye: number, 
                     rightEye: number,
@@ -159,22 +169,43 @@ namespace emote {
             this.eyeMapR = rightEye;
             this.mouthMap = mouth;
         }
-        
+
+        show() {
+            while (canReact) {}
+        }
+    }
+/* a Mood shows a main expression, and a periodic reaction
+whwn blinking, snoring, shivering or laughing etc...
+Display of the reaction face is controlled by two time-periods:
+"switchGap" governs how often; and "switchTime" says how long.
+
+A non-zero "switchVary" introduce some randomness, by extending
+the gap by an unpredictable multiple.
+*/
+    class Mood {
+        expression: Face; // main Face
+        switchGap: number;  // average ms between reactions
+        varyGap: number;    // % random variation in switchGap
+        reaction: Face; // reactive Face
+        switchTime: number; // average ms for reaction
+        varyTime: number;   // % random variation in switchTime
+
+        constructor(expression: Face, switchGap: number, varyGap: number,
+                    reaction: Face, switchTime: number, varyTime: number) {
+            this.expression = expression;
+            this.switchGap = switchGap;
+            this.varyGap = varyGap;
+            this.reaction = reaction;
+            this.switchTime = switchTime;
+            this.varyTime = varyTime;
+        }
+    // adopt this Mood
+        adopt() {
+            
+        }
     }
 
-    // INITIALISE
-
-    let mainFace: Face = new Face(eyeAll, eyeAll, allMouths[0]);
-    let mainEyes = 0;
-    let mainMouth = 0;
-    let altEyes = 0;
-    let altMouth = 0;
-    let canReact = false;
-    let switchGap = 0;
-    let switchTime = 0;
-    let switchVary = 0;
-
-    /* Use a bitmap to plot LEDs on/off in a subset of display-rows 
+      /* Use a bitmap to plot LEDs on/off in a subset of display-rows 
       (the top two for eyes; the bottom three for mouths).
       To optimise performance, bits are mapped low-endian and row-wise in
       groups of 5, (top-left pixel as the LSB; bottom-Right pixels as the MSB). 
@@ -195,14 +226,7 @@ namespace emote {
         }
     }
 
-    /*
-    In most moods, we sporadically switch between two faces.
-    So we may be blinking, snoring, shivering or laughing etc.
-    Display of the alternate face is controlled by two time-periods: 
-    "switchGap" governs how often; and "switchTime" says how long.
-    A non-zero "switchVary" introduce some randomness, by extending 
-    the gap by an unpredictable multiple.
-    */
+
 
     function setMood(eyes: Eyes, mouth: Mouths, otherEyes: Eyes, otherMouth: Mouths,
         gap: number, time: number, vary: number) {
@@ -224,7 +248,7 @@ namespace emote {
 // background animation handles repeated periodic reactions reflecting Moods
     function animate(): void {
         while (canReact) {
-            showBitmap(allEyes[altEyes], 2, 0);
+            showBitmap(myMood, 2, 0);
             showBitmap(allMouths[altMouth], 3, 2);
             pause(switchTime);
             showBitmap(allEyes[mainEyes], 2, 0);
@@ -351,10 +375,28 @@ namespace emote {
     /**
      * Stop any current animated reaction.
      */
-    //% block="stop reacting"
+    //% block="roll eyes %dir"
     //% weight=40
-    export function rollEyes() {
-        canReact = false;
+    export function rollEyes(spin:Spin) {
+        if (spin= Spin.Screw) {
+            look(EyesV.Up, EyesH.Left);
+            look(EyesV.Up, EyesH.Ahead);
+            look(EyesV.Up, EyesH.Right);
+            look(EyesV.Level, EyesH.Right);
+            look(EyesV.Down, EyesH.Right);
+            look(EyesV.Down, EyesH.Ahead);
+            look(EyesV.Down, EyesH.Left);
+            look(EyesV.Level, EyesH.Left);
+        } else {
+            look(EyesV.Level, EyesH.Left);
+            look(EyesV.Down, EyesH.Left);
+            look(EyesV.Down, EyesH.Ahead);
+            look(EyesV.Down, EyesH.Right);
+            look(EyesV.Level, EyesH.Right);
+            look(EyesV.Up, EyesH.Right);
+            look(EyesV.Up, EyesH.Ahead);
+            look(EyesV.Up, EyesH.Left);
+        }
     }
 
     /**
@@ -366,3 +408,11 @@ namespace emote {
         canReact = false;
     }
 }
+
+ // INITIALISE
+    let moods: Mood[] = initialiseMoods();
+    let myMood = moods[Moods.None];
+    //let mainFace: Face = new Face(eyeAll, eyeAll, allMouths[0]);
+    let canReact = false;
+
+ 
