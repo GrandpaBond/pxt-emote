@@ -117,6 +117,8 @@ namespace emote {
         Shiver,
         //% block="tickled"
         Tickled,
+        //% block="scornful"
+        Scornful,
         //% block="dead"
         Dead
     };
@@ -166,12 +168,13 @@ namespace emote {
                     rightEye: number,
                     mouth: number) {
             this.eyeMapL = leftEye;
-            this.eyeMapR = rightEye;
+            this.eyeMapR = rightEye << 3;
             this.mouthMap = mouth;
         }
 
         show() {
-            while (canReact) {}
+            while (busy) pause(20);
+            showFace(this.eyeMapL + this.eyeMapR, this.mouthMap);
         }
     }
 /* a Mood shows a main expression, and a periodic reaction
@@ -191,16 +194,19 @@ the gap by an unpredictable multiple.
         varyTime: number;   // % random variation in switchTime
 
         constructor(expression: Face, switchGap: number, varyGap: number,
-                    reaction: Face, switchTime: number, varyTime: number) {
+                    reaction: Face, switchTime: number, varyTime: number,
+                    blinkRate: number) {
             this.expression = expression;
             this.switchGap = switchGap;
             this.varyGap = varyGap;
             this.reaction = reaction;
             this.switchTime = switchTime;
             this.varyTime = varyTime;
+            this.blinkRate = blinkRate;
         }
     // adopt this Mood
-        adopt() {
+    // 
+        display() {
             
         }
     }
@@ -214,6 +220,7 @@ the gap by an unpredictable multiple.
                 32  64 128 256 512
     */
     function showBitmap(bitmap: number, rows: number, start: number) {
+        busy = true;
         for (let y = start; y < (start + rows); y++) {
             for (let x = 0; x < 5; x++) {
                 if (bitmap & 1) {
@@ -224,6 +231,7 @@ the gap by an unpredictable multiple.
                 bitmap >>= 1;
             }
         }
+        busy = false;
     }
 
 
@@ -414,5 +422,7 @@ the gap by an unpredictable multiple.
     let myMood = moods[Moods.None];
     //let mainFace: Face = new Face(eyeAll, eyeAll, allMouths[0]);
     let canReact = false;
+    let reacting = false;
+    let busy = false;
 
  
