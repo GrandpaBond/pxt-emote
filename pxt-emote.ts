@@ -4,98 +4,71 @@
 //% color=#402080 weight=100 icon="\uf4da" block="Emote"
 namespace emote {
     // CONSTANTS...    
-    // ensure these constants match the enum orderings below!
-    const allEyes = [
-        891,  //"Open"
-        874,  //"Sad"
-        864,  //"Shut"
-        347,  //"Mad"
-        27,   //"Up"
-        561,  //"Pop"
-        873,  //"Left"
-        882,  //"Right"
-        867,  //"Wink"
-        324   //"Flip"
-    ];
 
-    const allMouths = [
-        448,    //"Flat"
-        4416,   //"OK"
-        14880,  //"Grin"
-        17856,  //"Sulk"
-        14464,  //"Hmmm"
-        4420,   //"Open"
-        6240,   //"Left"
-        13056,  //"Right"
-        14660,  //"Shout"
-        15204,  //"Laugh"
-        6944,   //"Smirk"
-        128,    //"Kiss"
-        28512   //"Flip"
-    ];
-    // pixel-map contributions for different sub-sets of eye pixels
+    // eye pixels use these pixel-map contributions
     //    ( 1   2)   4  ( 8  16 )
     //    (32  64) 128  (256 512)
-    // left-eye maps (for right-eye use {map} << 3)
-    const eyeUp = 1 + 2;
-    const eyeDown = 32 + 64;
-    const eyeLeft = 1 + 32;
-    const eyeRight = 2 + 64;
-    const eyeAll = 1 + 2 + 32 + 64;
+    // Left-eye maps  -- for right-eye use {map} << 3
+    //                -- or use bothEyes({left},{right})
+    enum Eye {
+        Up = 1 + 2,
+        Down = 32 + 64,
+        Left = 1 + 32,
+        Right = 2 + 64,
+        All = 1 + 2 + 32 + 64
+    }
 
-    // ENUMS...
-
-    // ensure these enums match the constant orderings above!
+// UI ENUMS
     export enum Eyes {
         //% block="open"
-        Open,
+        Open = bothEyes(Eye.All, Eye.All),
         //% block="sad"
-        Sad,
+        Sad = bothEyes(Eye.Down | Eye.Right, Eye.Down | Eye.Left),
         //% block="shut"
-        Shut,
+        Shut = bothEyes(Eye.Down, Eye.Down),
         //% block="mad"
-        Mad,
+        Mad = bothEyes(Eye.Up | Eye.Right, Eye.Up | Eye.Left),
         //% block="up"
-        Up,
+        Up = bothEyes(Eye.Up, Eye.Up),
         //% block="pop"
-        Pop,
+        Pop = bothEyes(Eye.Left, Eye.Right),
         //% block="left"
-        Left,
+        Left = bothEyes(Eye.Left, Eye.Left),
         //% block="right"
-        Right,
+        Right = bothEyes(Eye.Right, Eye.Right),
         //% block="wink"
-        Wink,
+        Wink = bothEyes(Eye.Down, Eye.All),
         //% block="flip"
-        Flip
+        Flip = 324 // (=OK mouth, but upside-down)
     };
 
-    export enum Mouths {
+    export enum Mouth {
         //% block="flat"
-        Flat,
+        Flat = 448,
         //% block="ok"
-        Ok,
+        Ok = 4416,
         //% block="grin"
-        Grin,
+        Grin = 14880,
         //% block="sulk"
-        Sulk,
+        Sulk = 17856,
         //% block="Hmmm"
-        Hmmm,
+        Hmmm = 14464,
         //% block="open"
-        Open,
+        Open = 4420,
         //% block="left"
-        Left,
+        Left = 6240,
         //% block="right"
-        Right,
+        Right = 13056,
         //% block="shout"
-        Shout,
+        Shout = 14660,
         //% block="laugh"
-        Laugh,
+        Laugh = 15204,
         //% block="smirk"
-        Smirk,
+        Smirk = 6944,
         //% block="kiss"
-        Kiss,
+        Kiss = 128,
         //% block="flip"
-        Flip
+        Flip = 28512 // (=open eyes, but upside-down)
     };
 
     export enum Moods {
@@ -160,21 +133,21 @@ namespace emote {
 
 // a Face is an expression
     class Face {
-        eyeMapL: number;
-        eyeMapR: number;
-        mouthMap: number;
+        leftEye: number;
+        rightEye: number;
+        mouth: number;
 
-        constructor(leftEye: number, 
-                    rightEye: number,
-                    mouth: number) {
-            this.eyeMapL = leftEye;
-            this.eyeMapR = rightEye << 3;
-            this.mouthMap = mouth;
+        constructor(leftEye: Eye, 
+                    rightEye: Eye,
+                    mouth: Mouth) {
+            this.leftEye = leftEye;
+            this.rightEye = rightEye << 3;
+            this.mouth = mouth;
         }
 
         show() {
             while (busy) pause(20);
-            showFace(this.eyeMapL + this.eyeMapR, this.mouthMap);
+            showFace(bothEyes(this.leftEye, this.rightEye), this.mouth);
         }
     }
 /* a Mood shows a main expression, and a periodic reaction
@@ -209,6 +182,9 @@ the gap by an unpredictable multiple.
         display() {
             
         }
+    }
+    function bothEyes(left: Eye, right: Eye): number {
+        return (left + (right << 3))
     }
 
       /* Use a bitmap to plot LEDs on/off in a subset of display-rows 
@@ -347,7 +323,7 @@ the gap by an unpredictable multiple.
     }
 
     /**
-     * Start reacting in the chosen mood with an animated facial expression.
+     * Start reacting in the chosen mood, with an animated facial expression.
      * @param mood choice of mood
      */
     //% blockId=emote_newMood
@@ -356,37 +332,47 @@ the gap by an unpredictable multiple.
     export function newMood(mood: Moods) {
         // constrain using ENUMs to the currently defined values.
         // params are: basic eyes/mouth;  alternate eyes/mouth;  switch gap/time/multiple
-        if (mood == Moods.Snoring) {
-            setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Open, 2000, 2000, 0);
-        } else if (mood == Moods.Asleep) {
-            setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Hmmm, 3000, 500, 0);
-        } else if (mood == Moods.None) {
-            setMood(Eyes.Open, Mouths.Flat, Eyes.Shut, Mouths.Flat, 600, 300, 2);
-        } else if (mood == Moods.Happy) {
-            setMood(Eyes.Open, Mouths.Grin, Eyes.Wink, Mouths.Smirk, 1500, 400, 2);
-        } else if (mood == Moods.Sad) {
-            setMood(Eyes.Sad, Mouths.Sulk, Eyes.Shut, Mouths.Hmmm, 2000, 600, 1);
-        } else if (mood == Moods.Angry) {
-            setMood(Eyes.Mad, Mouths.Hmmm, Eyes.Mad, Mouths.Shout, 600, 800, 3);
-        } else if (mood == Moods.Surprised) {
-            setMood(Eyes.Pop, Mouths.Open, Eyes.Open, Mouths.Open, 1600, 400, 0);
-        } else if (mood == Moods.Shiver) {
-            setMood(Eyes.Left, Mouths.Right, Eyes.Right, Mouths.Left, 140, 140, 0);
-        } else if (mood == Moods.Tickled) {
-            setMood(Eyes.Open, Mouths.Ok, Eyes.Flip, Mouths.Flip, 750, 250, 0);
-        }
-        if (mood == Moods.Dead) {
-            basic.showIcon(IconNames.Skull);
+        switch (mood) {
+            case Moods.Snoring:
+                setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Open, 2000, 2000, 0);
+                break;
+            case Moods.Asleep:
+                setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Hmmm, 3000, 500, 0);
+                break;
+            case Moods.None:
+                setMood(Eyes.Open, Mouths.Flat, Eyes.Shut, Mouths.Flat, 600, 300, 2);
+                break;
+            case Moods.Happy:
+                setMood(Eyes.Open, Mouths.Grin, Eyes.Wink, Mouths.Smirk, 1500, 400, 2);
+                break;
+            case Moods.Sad:
+                setMood(Eyes.Sad, Mouths.Sulk, Eyes.Shut, Mouths.Hmmm, 2000, 600, 1);
+                break;
+            case Moods.Angry:
+                setMood(Eyes.Mad, Mouths.Hmmm, Eyes.Mad, Mouths.Shout, 600, 800, 3);
+                break;
+            case Moods.Surprised:
+                setMood(Eyes.Pop, Mouths.Open, Eyes.Open, Mouths.Open, 1600, 400, 0);
+                break;
+            case Moods.Shiver:
+                setMood(Eyes.Left, Mouths.Right, Eyes.Right, Mouths.Left, 140, 140, 0);
+                break;
+            case Moods.Tickled:
+                setMood(Eyes.Open, Mouths.Ok, Eyes.Flip, Mouths.Flip, 750, 250, 0);
+                break;
+            case Moods.Dead:
+                basic.showIcon(IconNames.Skull);
+                break;
         }
     }
 
     /**
-     * Stop any current animated reaction.
+     * Roll the eyes in either direction.
      */
     //% block="roll eyes %dir"
     //% weight=40
     export function rollEyes(spin:Spin) {
-        if (spin= Spin.Screw) {
+        if (spin == Spin.Screw) {
             look(EyesV.Up, EyesH.Left);
             look(EyesV.Up, EyesH.Ahead);
             look(EyesV.Up, EyesH.Right);
