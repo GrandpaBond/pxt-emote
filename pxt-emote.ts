@@ -1,23 +1,29 @@
 /**
- * an extension for making faces..
+ * an extension for making faces...
  */
 //% color=#402080 weight=100 icon="\uf4da" block="Emote"
 namespace emote {
-    // CONSTANTS & ENUMS...    
-    // eyes use these pixel-map contributions
-    //    ( 1   2)   4  ( 8  16 )
-    //    (32  64) 128  (256 512)
-    // Left-eye maps  -- for right-eye use {map} << 3
-    //                -- or use bothEyes({left},{right})
+    // CONSTANTS & ENUMS...
+
+    /* eyes use these pixel-map contributions
+        ( 1   2)   4  ( 8  16 )
+        (32  64) 128  (256 512) 
+    
+    The value of each Eye Enum is a two-row bitmap for just the 
+    left eye pattern. The right eye will need {map} << 3
+    We use bothEyes({left},{right}) to get the complete bitmap
+    */
     enum Eye {
-        Up = 1 + 2,
-        Down = 32 + 64,
-        Left = 1 + 32,
-        Right = 2 + 64,
-        All = 1 + 2 + 32 + 64
+        Up = (1 + 2),
+        Down = (32 + 64),
+        Left = (1 + 32),
+        Right = (2 + 64),
+        All = (1 + 2 + 32 + 64)
     }
 
 // USER INTERFACE DROP-Down ENUMS
+
+// EYES: (the value of each Enum is a two-row bitmap)
     export enum Eyes {
         //% block="open"
         Open = bothEyes(Eye.All, Eye.All),
@@ -39,10 +45,11 @@ namespace emote {
         Wink = bothEyes(Eye.Down, Eye.All)
         /*
         //% block="flip"
-        Flip = 324 // (=OK mouth, but upside-down)
+        Flip = 324 // (=OK mouth, but upside-down!)
         */
     };
-    // mouth uses these pixel-map contributions
+
+    //MOUTHS: use these pixel-map contributions
     //       1    2    4   8   16  
     //      32   64  128  256  512 
     //      1K   2K   4K   8K  16K  
@@ -73,7 +80,7 @@ namespace emote {
         Kiss = 128
         /*
         //% block="flip"
-        Flip = 28512 // (=open eyes, but upside-down)
+        Flip = 28512 // (=open eyes, but upside-down!)
         */
     };
 
@@ -159,6 +166,7 @@ Display of the reaction face is controlled by two time-periods:
 A non-zero "switchVary" introduce some randomness, by extending
 the gap by an unpredictable multiple.
 */
+// myMood (a Mood object) holds all the information we need to share with the background animate() 
     class Mood {
         expression: Face; // main Face
         switchGap: number;  // average ms between reactions
@@ -166,28 +174,27 @@ the gap by an unpredictable multiple.
         reaction: Face; // reactive Face
         switchTime: number; // average ms for reaction
         varyTime: number;   // % random variation in switchTime
+        blinkGap: number; //  average ms between blinks
+        blinkTime: number; // average ms for blink
 
         constructor(expression: Face, switchGap: number, varyGap: number,
                     reaction: Face, switchTime: number, varyTime: number,
-                    blinkRate: number) {
+                    blinkGap: number, blinkTime: number) {
             this.expression = expression;
             this.switchGap = switchGap;
             this.varyGap = varyGap;
             this.reaction = reaction;
             this.switchTime = switchTime;
             this.varyTime = varyTime;
-            this.blinkRate = blinkRate;
+            this.blinkGap = blinkGap;
+            this.blinkTime = blinkTime;
         }
+
     // adopt this Mood
-    
-    // the Mood object holds all the information we need to share with the background animate() 
-        canReact = true;
-        //showBitmap(mainEyes, 0, 2);
-        //showBitmap(mainMouth, 2, 5);
-
-        control.inBackground(function () { animate() });
-    }
-
+        become() {
+            canReact = true;
+            control.inBackground(function () { animate() });
+        }
     }
 
 
@@ -221,9 +228,8 @@ So for a 2-row pair of eyes, the pixel contributions are:
 // background animation handles repeated periodic reactions reflecting Moods
     function animate(): void {
         while (canReact) {
-            showBitmap(myMood, 2, 0);
-            showBitmap(altMouth, 3, 2);
-            pause(switchTime);
+            myMood.expression.
+            pause(myMood.switchTime);
             showBitmap(mainEyes, 2, 0);
             showBitmap(mainMouth, 3, 2);
             pause(switchGap + randint(0, switchVary) * switchGap);
@@ -280,30 +286,30 @@ So for a 2-row pair of eyes, the pixel contributions are:
         canReact = false;
         let eyeMap = 0;
         if ((upDown == EyesV.Level) && (leftRight == EyesH.Ahead)) {
-            eyeMap = eyeAll + (eyeAll << 3);
+            eyeMap = Eye.All + (Eye.All << 3);
         } else {
             switch (upDown) {
-                case EyesV.Up: eyeMap = eyeUp + (eyeUp << 3);
+                case EyesV.Up: eyeMap = Eye.Up + (Eye.Up << 3);
                     break;
                 case EyesV.Level:
                     break;
-                case EyesV.Down: eyeMap = eyeDown + (eyeDown << 3);
+                case EyesV.Down: eyeMap = Eye.Down + (Eye.Down << 3);
                     break;
             }
             switch (leftRight) {
                 case EyesH.Left:
-                    eyeMap |= eyeLeft + (eyeLeft << 3);
+                    eyeMap |= Eye.Left + (Eye.Left << 3);
                     break;
                 case EyesH.Ahead:
                     break;
                 case EyesH.Right:
-                    eyeMap |= eyeRight + (eyeRight << 3);
+                    eyeMap |= Eye.Right + (Eye.Right << 3);
                     break;
                 case EyesH.Inwards:
-                    eyeMap |= eyeRight + (eyeLeft << 3);
+                    eyeMap |= Eye.Right + (Eye.Left << 3);
                     break;
                 case EyesH.Outwards:
-                    eyeMap |= eyeLeft + (eyeRight << 3);
+                    eyeMap |= Eye.Left + (Eye.Right << 3);
                     break;
             }
         }
@@ -325,7 +331,7 @@ So for a 2-row pair of eyes, the pixel contributions are:
 
 
     function initMoods(): Mood[] {
-        let all = Mood[MOODCOUNT];
+        let all: Mood[] = Mood[MOODCOUNT];
         // params are: basic eyes/mouth;  alternate eyes/mouth;  switch gap/time/multiple
         all[Moods.None] = new Mood(Eyes.Open, Mouth.Flat, Eyes.Shut, Mouth.Flat, 600, 300, 2);
         all[Moods.Happy] = new Mood(Eyes.Open, Mouth.Grin, Eyes.Wink, Mouth.Smirk, 1500, 400, 2);
@@ -380,8 +386,7 @@ So for a 2-row pair of eyes, the pixel contributions are:
 
  // INITIALISE
     let allMoods: Mood[] = initMoods();
-    let myMood = moods[Moods.None];
-    let mainFace = new Face(Eye.All, Eye.All, Mouth.Flat);
+    let myMood = moods[Moods.None]; // everything animate() needs to know!
     let canReact = false;
     let reacting = false;
     let busy = false;
