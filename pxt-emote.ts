@@ -3,9 +3,8 @@
  */
 //% color=#402080 weight=100 icon="\uf4da" block="Emote"
 namespace emote {
-    // CONSTANTS...    
-
-    // eye pixels use these pixel-map contributions
+    // CONSTANTS & ENUMS...    
+    // eyes use these pixel-map contributions
     //    ( 1   2)   4  ( 8  16 )
     //    (32  64) 128  (256 512)
     // Left-eye maps  -- for right-eye use {map} << 3
@@ -18,7 +17,7 @@ namespace emote {
         All = 1 + 2 + 32 + 64
     }
 
-// UI ENUMS
+// USER INTERFACE DROP-Down ENUMS
     export enum Eyes {
         //% block="open"
         Open = bothEyes(Eye.All, Eye.All),
@@ -37,11 +36,16 @@ namespace emote {
         //% block="right"
         Right = bothEyes(Eye.Right, Eye.Right),
         //% block="wink"
-        Wink = bothEyes(Eye.Down, Eye.All),
+        Wink = bothEyes(Eye.Down, Eye.All)
+        /*
         //% block="flip"
         Flip = 324 // (=OK mouth, but upside-down)
+        */
     };
-
+    // mouth uses these pixel-map contributions
+    //       1    2    4   8   16  
+    //      32   64  128  256  512 
+    //      1K   2K   4K   8K  16K  
     export enum Mouth {
         //% block="flat"
         Flat = 448,
@@ -66,9 +70,11 @@ namespace emote {
         //% block="smirk"
         Smirk = 6944,
         //% block="kiss"
-        Kiss = 128,
+        Kiss = 128
+        /*
         //% block="flip"
         Flip = 28512 // (=open eyes, but upside-down)
+        */
     };
 
     export enum Moods {
@@ -95,6 +101,7 @@ namespace emote {
         //% block="dead"
         Dead
     };
+    const MOODCOUNT = Moods.Dead + 1;
 
     export enum EyesV {
         //% block="up"
@@ -125,23 +132,17 @@ namespace emote {
         Unscrew
     };
 
-    enum Glances {
-
-    };
-
-
-
-// a Face is an expression
+// a Face is an expression having two eyes and a mouth
     class Face {
-        leftEye: number;
-        rightEye: number;
-        mouth: number;
+        leftEye: Eye;
+        rightEye: Eye;
+        mouth: Mouth;
 
         constructor(leftEye: Eye, 
                     rightEye: Eye,
                     mouth: Mouth) {
             this.leftEye = leftEye;
-            this.rightEye = rightEye << 3;
+            this.rightEye = rightEye;
             this.mouth = mouth;
         }
 
@@ -178,23 +179,30 @@ the gap by an unpredictable multiple.
             this.blinkRate = blinkRate;
         }
     // adopt this Mood
-    // 
-        display() {
-            
-        }
+    
+    // the Mood object holds all the information we need to share with the background animate() 
+        canReact = true;
+        //showBitmap(mainEyes, 0, 2);
+        //showBitmap(mainMouth, 2, 5);
+
+        control.inBackground(function () { animate() });
     }
+
+    }
+
+
     function bothEyes(left: Eye, right: Eye): number {
         return (left + (right << 3))
     }
 
-      /* Use a bitmap to plot LEDs on/off in a subset of display-rows 
-      (the top two for eyes; the bottom three for mouths).
-      To optimise performance, bits are mapped low-endian and row-wise in
-      groups of 5, (top-left pixel as the LSB; bottom-Right pixels as the MSB). 
-      So for a 2-row pair of eyes, the pixel contributions are:
-                1   2   4   8  16
-                32  64 128 256 512
-    */
+/* Use a bitmap to plot LEDs on/off in a subset of display-rows 
+(the top two for eyes; the bottom three for mouths).
+To optimise performance, bits are mapped low-endian and row-wise in
+groups of 5, (top-left pixel as the LSB; bottom-Right pixels as the MSB). 
+So for a 2-row pair of eyes, the pixel contributions are:
+        1   2   4   8  16
+        32  64 128 256 512
+*/
     function showBitmap(bitmap: number, rows: number, start: number) {
         busy = true;
         for (let y = start; y < (start + rows); y++) {
@@ -210,33 +218,14 @@ the gap by an unpredictable multiple.
         busy = false;
     }
 
-
-
-    function setMood(eyes: Eyes, mouth: Mouths, otherEyes: Eyes, otherMouth: Mouths,
-        gap: number, time: number, vary: number) {
-        canReact = false;
-        mainEyes = eyes;
-        mainMouth = mouth;
-        altEyes = otherEyes;
-        altMouth = otherMouth;
-
-        switchGap = gap;
-        switchTime = time;
-        switchVary = vary;
-        canReact = true;
-        showBitmap(allEyes[mainEyes], 0, 2);
-        showBitmap(allMouths[mainMouth], 2, 5);
-
-        control.inBackground(function () { animate() });
-    }
 // background animation handles repeated periodic reactions reflecting Moods
     function animate(): void {
         while (canReact) {
             showBitmap(myMood, 2, 0);
-            showBitmap(allMouths[altMouth], 3, 2);
+            showBitmap(altMouth, 3, 2);
             pause(switchTime);
-            showBitmap(allEyes[mainEyes], 2, 0);
-            showBitmap(allMouths[mainMouth], 3, 2);
+            showBitmap(mainEyes, 2, 0);
+            showBitmap(mainMouth, 3, 2);
             pause(switchGap + randint(0, switchVary) * switchGap);
         }
     }
@@ -251,7 +240,7 @@ the gap by an unpredictable multiple.
     //% weight=20
     export function showEyes(eyes: Eyes) {
         canReact = false;
-        showBitmap(allEyes[eyes], 2, 0);
+        showBitmap(eyes, 2, 0);
     }
 
     /**
@@ -260,9 +249,9 @@ the gap by an unpredictable multiple.
      */
     //% block="show mouth as $mouth"
     //% weight=10
-    export function showMouth(mouth: Mouths) {
+    export function showMouth(mouth: Mouth) {
         canReact = false;
-        showBitmap(allMouths[mouth], 3, 2);
+        showBitmap(mouth, 3, 2);
     }
 
     /**
@@ -272,12 +261,11 @@ the gap by an unpredictable multiple.
      */
     //% block="show face with eyes= $eyes, mouth= $mouth"
     //% weight=30
-    export function showFace(eyes: Eyes, mouth: Mouths) {
+    export function showFace(eyes: Eyes, mouth: Mouth) {
         canReact = false;
-        showBitmap(allEyes[eyes], 2, 0);
-        showBitmap(allMouths[mouth], 3, 2);
+        showBitmap(eyes, 2, 0);
+        showBitmap(mouth, 3, 2);
     }
-
 
     /**
      * Look in the chosen direction.
@@ -326,44 +314,31 @@ the gap by an unpredictable multiple.
      * Start reacting in the chosen mood, with an animated facial expression.
      * @param mood choice of mood
      */
-    //% blockId=emote_newMood
-    //% block="react as $mood"
+    
+    //% block="become $mood"
     //% weight=50
+
     export function newMood(mood: Moods) {
-        // constrain using ENUMs to the currently defined values.
+        myMood = allMoods[mood];
+    }
+    
+
+
+    function initMoods(): Mood[] {
+        let all = Mood[MOODCOUNT];
         // params are: basic eyes/mouth;  alternate eyes/mouth;  switch gap/time/multiple
-        switch (mood) {
-            case Moods.Snoring:
-                setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Open, 2000, 2000, 0);
-                break;
-            case Moods.Asleep:
-                setMood(Eyes.Shut, Mouths.Flat, Eyes.Shut, Mouths.Hmmm, 3000, 500, 0);
-                break;
-            case Moods.None:
-                setMood(Eyes.Open, Mouths.Flat, Eyes.Shut, Mouths.Flat, 600, 300, 2);
-                break;
-            case Moods.Happy:
-                setMood(Eyes.Open, Mouths.Grin, Eyes.Wink, Mouths.Smirk, 1500, 400, 2);
-                break;
-            case Moods.Sad:
-                setMood(Eyes.Sad, Mouths.Sulk, Eyes.Shut, Mouths.Hmmm, 2000, 600, 1);
-                break;
-            case Moods.Angry:
-                setMood(Eyes.Mad, Mouths.Hmmm, Eyes.Mad, Mouths.Shout, 600, 800, 3);
-                break;
-            case Moods.Surprised:
-                setMood(Eyes.Pop, Mouths.Open, Eyes.Open, Mouths.Open, 1600, 400, 0);
-                break;
-            case Moods.Shiver:
-                setMood(Eyes.Left, Mouths.Right, Eyes.Right, Mouths.Left, 140, 140, 0);
-                break;
-            case Moods.Tickled:
-                setMood(Eyes.Open, Mouths.Ok, Eyes.Flip, Mouths.Flip, 750, 250, 0);
-                break;
-            case Moods.Dead:
-                basic.showIcon(IconNames.Skull);
-                break;
-        }
+        all[Moods.None] = new Mood(Eyes.Open, Mouth.Flat, Eyes.Shut, Mouth.Flat, 600, 300, 2);
+        all[Moods.Happy] = new Mood(Eyes.Open, Mouth.Grin, Eyes.Wink, Mouth.Smirk, 1500, 400, 2);
+        all[Moods.Sad] = new Mood(Eyes.Sad, Mouth.Sulk, Eyes.Shut, Mouth.Hmmm, 2000, 600, 1);
+        all[Moods.Angry] = new Mood(Eyes.Mad, Mouth.Hmmm, Eyes.Mad, Mouth.Shout, 600, 800, 3);
+        all[Moods.Surprised] = new Mood(Eyes.Pop, Mouth.Open, Eyes.Open, Mouth.Open, 1600, 400, 0);
+        all[Moods.Asleep] = new Mood(Eyes.Shut, Mouth.Flat, Eyes.Shut, Mouth.Hmmm, 3000, 500, 0);
+        all[Moods.Snoring] = new Mood(Eyes.Shut, Mouth.Flat, Eyes.Shut, Mouth.Open, 2000, 2000, 0);
+        all[Moods.Shiver] = new Mood(Eyes.Left, Mouth.Right, Eyes.Right, Mouth.Left, 140, 140, 0);
+        all[Moods.Tickled] = new Mood(Eyes.Open, Mouth.Ok, Eyes.Flip, Mouth.Flip, 750, 250, 0);
+        all[Moods.Scornful] = new Mood(Eyes.Open, Mouth.Ok, Eyes.Flip, Mouth.Flip, 750, 250, 0);
+        all[Moods.Dead] = basic.showIcon(IconNames.Skull);
+        return (all);
     }
 
     /**
@@ -401,14 +376,16 @@ the gap by an unpredictable multiple.
     export function cease() {
         canReact = false;
     }
-}
+
 
  // INITIALISE
-    let moods: Mood[] = initialiseMoods();
+    let allMoods: Mood[] = initMoods();
     let myMood = moods[Moods.None];
-    //let mainFace: Face = new Face(eyeAll, eyeAll, allMouths[0]);
+    let mainFace = new Face(Eye.All, Eye.All, Mouth.Flat);
     let canReact = false;
     let reacting = false;
     let busy = false;
+    let litMap = 0;
+}
 
  

@@ -1,9 +1,9 @@
 input.onPinPressed(TouchPin.P0, function () {
-    emote.showMouth(emote.Mouths.Sulk)
+    emote.showMouth(emote.Mouth.Sulk)
     rollEyes()
 })
 function glance () {
-    emote.showMouth(emote.Mouths.Flat)
+    emote.showMouth(emote.Mouth.Flat)
     dir = (dir + 1) % 16
     if (dir == 0) {
         emote.look(emote.EyesV.Up, emote.EyesH.Left)
@@ -45,32 +45,32 @@ function next_mouth () {
         flipped = false
     }
     if (mouth == 0) {
-        emote.showMouth(emote.Mouths.Flat)
+        emote.showMouth(emote.Mouth.Flat)
     } else if (mouth == 1) {
-        emote.showMouth(emote.Mouths.Ok)
+        emote.showMouth(emote.Mouth.Ok)
     } else if (mouth == 2) {
-        emote.showMouth(emote.Mouths.Grin)
+        emote.showMouth(emote.Mouth.Grin)
     } else if (mouth == 3) {
-        emote.showMouth(emote.Mouths.Sulk)
+        emote.showMouth(emote.Mouth.Sulk)
     } else if (mouth == 4) {
-        emote.showMouth(emote.Mouths.Hmmm)
+        emote.showMouth(emote.Mouth.Hmmm)
     } else if (mouth == 5) {
-        emote.showMouth(emote.Mouths.Open)
+        emote.showMouth(emote.Mouth.Open)
     } else if (mouth == 6) {
-        emote.showMouth(emote.Mouths.Left)
+        emote.showMouth(emote.Mouth.Left)
     } else if (mouth == 7) {
-        emote.showMouth(emote.Mouths.Right)
+        emote.showMouth(emote.Mouth.Right)
     } else if (mouth == 8) {
-        emote.showMouth(emote.Mouths.Shout)
+        emote.showMouth(emote.Mouth.Shout)
     } else if (mouth == 9) {
-        emote.showMouth(emote.Mouths.Laugh)
+        emote.showMouth(emote.Mouth.Laugh)
     } else if (mouth == 10) {
-        emote.showMouth(emote.Mouths.Kiss)
+        emote.showMouth(emote.Mouth.Kiss)
     } else if (mouth == 11) {
-        emote.showMouth(emote.Mouths.Smirk)
+        emote.showMouth(emote.Mouth.Smirk)
     } else if (mouth == 12) {
         emote.showEyes(emote.Eyes.Flip)
-        emote.showMouth(emote.Mouths.Flip)
+        emote.showMouth(emote.Mouth.Flip)
         flipped = true
         mouth = -1
     }
