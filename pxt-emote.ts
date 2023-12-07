@@ -139,10 +139,11 @@ namespace emote {
         Unscrew
     };
 
-// a Face is an expression having two eyes and a mouth
+/* a Face is an expression having two eyes and a mouth
     class Face {
         leftEye: Eye;
         rightEye: Eye;
+        eyes: number;
         mouth: Mouth;
 
         constructor(leftEye: Eye, 
@@ -150,14 +151,18 @@ namespace emote {
                     mouth: Mouth) {
             this.leftEye = leftEye;
             this.rightEye = rightEye;
+            this.eyes = bothEyes(leftEye, rightEye);
             this.mouth = mouth;
         }
 
         show() {
             while (busy) pause(20);
-            showFace(bothEyes(this.leftEye, this.rightEye), this.mouth);
+            showFace(this.eyes, this.mouth);
         }
     }
+    */
+
+
 /* a Mood shows a main expression, and a periodic reaction
 whwn blinking, snoring, shivering or laughing etc...
 Display of the reaction face is controlled by two time-periods:
@@ -168,14 +173,20 @@ the gap by an unpredictable multiple.
 */
 // myMood (a Mood object) holds all the information we need to share with the background animate() 
     class Mood {
-        expression: Face; // main Face
-        switchGap: number;  // average ms between reactions
-        varyGap: number;    // % random variation in switchGap
-        reaction: Face; // reactive Face
-        switchTime: number; // average ms for reaction
-        varyTime: number;   // % random variation in switchTime
-        blinkGap: number; //  average ms between blinks
-        blinkTime: number; // average ms for blink
+        mainEyes: number;
+        mainMouth: number;
+        reactEyes: number;
+        reactMouth: number;
+
+        switchGap: number;     // average ms between reactions
+        switchGapVary: number; // % random variation in switchGap
+        switchTime: number;    // average ms for reaction
+        switchTimeVary: number;// % random variation in switchTime
+
+        blinkGap: number;      //  average ms between blinks
+        blinkGapVary: number;  // % random variation in blinkGap
+        blinkTime: number;     // average ms for a blink
+        blinkTimeVary: number; // % random variation in blinkTime
 
         constructor(expression: Face, switchGap: number, varyGap: number,
                     reaction: Face, switchTime: number, varyTime: number,
@@ -225,14 +236,19 @@ So for a 2-row pair of eyes, the pixel contributions are:
         busy = false;
     }
 
+// pause for ms +/- vary%
+    function delay(ms:number, vary: number){
+        let time = ms * (100 + (randint(0, 2*vary) - vary)) / 100;
+        pause(time);
+    }
+
 // background animation handles repeated periodic reactions reflecting Moods
     function animate(): void {
         while (canReact) {
-            myMood.expression.
-            pause(myMood.switchTime);
-            showBitmap(mainEyes, 2, 0);
-            showBitmap(mainMouth, 3, 2);
-            pause(switchGap + randint(0, switchVary) * switchGap);
+            myMood.react();
+            delay(myMood.switchTime,myMood.switchTimeVary);
+            myMood.express()
+            delay(myMood.switchGap,myMood.switchGapVary);
         }
     }
 
@@ -332,7 +348,10 @@ So for a 2-row pair of eyes, the pixel contributions are:
 
     function initMoods(): Mood[] {
         let all: Mood[] = Mood[MOODCOUNT];
+        let expression = new Face(mainLeftEye, mainRightEye, mainMouth);
+        let Face = newFa
         // params are: basic eyes/mouth;  alternate eyes/mouth;  switch gap/time/multiple
+        
         all[Moods.None] = new Mood(Eyes.Open, Mouth.Flat, Eyes.Shut, Mouth.Flat, 600, 300, 2);
         all[Moods.Happy] = new Mood(Eyes.Open, Mouth.Grin, Eyes.Wink, Mouth.Smirk, 1500, 400, 2);
         all[Moods.Sad] = new Mood(Eyes.Sad, Mouth.Sulk, Eyes.Shut, Mouth.Hmmm, 2000, 600, 1);
