@@ -139,28 +139,32 @@ namespace emote {
         Unscrew
     };
 
-/* a Face is an expression having two eyes and a mouth
-    class Face {
-        leftEye: Eye;
-        rightEye: Eye;
-        eyes: number;
-        mouth: Mouth;
+// CLASSES
 
-        constructor(leftEye: Eye, 
-                    rightEye: Eye,
-                    mouth: Mouth) {
-            this.leftEye = leftEye;
-            this.rightEye = rightEye;
+// an Action shows an expression and emits a sound for a given time
+    class Action {
+        eyes: number;
+        mouth: number;
+        sound: string;
+        
+        constructor(leftEye: Eye, rightEye: Eye, mouth: Mouth,
+                    sound: string) {
             this.eyes = bothEyes(leftEye, rightEye);
             this.mouth = mouth;
+            this.sound = sound;
         }
-
-        show() {
-            while (busy) pause(20);
-            showFace(this.eyes, this.mouth);
+// initiate performance of this reaction (may move this outside)
+        act(pitch: number, vMax: number, ms: number){
+            if (!reacting) {
+                reacting = true; // set global flag
+                showFace(this.eyes, this.mouth);
+                flexFX.playFlexFX(this.sound, false, pitch, vMax, ms);
+            }
         }
     }
-    */
+
+
+
 
 
 /* a Mood shows a main expression, and a periodic reaction
@@ -177,6 +181,13 @@ the gap by an unpredictable multiple.
         mainMouth: number;
         reactEyes: number;
         reactMouth: number;
+        mainBitmap: number;
+        reactBitmap: number;
+        pitch: number;
+        vMax: number;
+        ms: number;
+
+        
 
         switchGap: number;     // average ms between reactions
         switchGapVary: number; // % random variation in switchGap
@@ -201,14 +212,31 @@ the gap by an unpredictable multiple.
             this.blinkTime = blinkTime;
         }
 
+        addReaction(behaviour: Reaction)
+
     // adopt this Mood
         become() {
             canReact = true;
             control.inBackground(function () { animate() });
         }
+        
+/* a Pattern controls an ongoing periodic triggering of a random 
+choice from a selection of Reactions. It controls the 
+*/
+
     }
 
+// background animation handles repeated periodic reactions reflecting Moods
+    function animate(): void {
+        while (canReact) {
+            myMood.react();
+            delay(myMood.switchTime,myMood.switchTimeVary);
+            myMood.express()
+            delay(myMood.switchGap,myMood.switchGapVary);
+        }
+    }
 
+// LOW_LEVEL TOOLS
     function bothEyes(left: Eye, right: Eye): number {
         return (left + (right << 3))
     }
@@ -240,16 +268,6 @@ So for a 2-row pair of eyes, the pixel contributions are:
     function delay(ms:number, vary: number){
         let time = ms * (100 + (randint(0, 2*vary) - vary)) / 100;
         pause(time);
-    }
-
-// background animation handles repeated periodic reactions reflecting Moods
-    function animate(): void {
-        while (canReact) {
-            myMood.react();
-            delay(myMood.switchTime,myMood.switchTimeVary);
-            myMood.express()
-            delay(myMood.switchGap,myMood.switchGapVary);
-        }
     }
 
     // EXPORTED USER INTERFACES  
@@ -405,7 +423,7 @@ So for a 2-row pair of eyes, the pixel contributions are:
 
  // INITIALISE
     let allMoods: Mood[] = initMoods();
-    let myMood = moods[Moods.None]; // everything animate() needs to know!
+    let myMood = allMoods[Moods.None]; // everything animate() needs to know!
     let canReact = false;
     let reacting = false;
     let busy = false;
